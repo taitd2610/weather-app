@@ -1,0 +1,25 @@
+@import url("https://fonts.googleapis.com/css2?family=Varela+Round&display=swap");
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply h-screen w-screen bg-gradient-to-r from-green-200 to-blue-200 flex justify-center items-center;
+  }
+}
+
+/* body {
+  background-image: radial-gradient(
+    circle 993px at 0.5% 50.5%,
+    rgba(137, 171, 245, 0.37) 0%,
+    rgba(245, 247, 252, 1) 100.2%
+  );
+  font-family: "Varela Round", sans-serif;
+  height: 100vh;
+  width: 100vw;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+} */

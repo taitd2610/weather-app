@@ -1,82 +1,98 @@
-import Head from 'next/head'
+import { useState } from "react";
+import Head from "next/head";
+import Image from "next/image";
+import Metrics from "../components/Metrics";
+import { useRouter } from "next/router";
+import { UTCEpochToLocalDate } from "../utils/utils";
 
-export default function Home() {
-  return (
-    <div className="flex flex-col items-center justify-center min-h-screen py-2">
+export default function Home({ weatherData }) {
+  const router = useRouter();
+
+  const [city, setCity] = useState("Hanoi");
+
+  // Bắt sự kiện người dùng click enter
+  const enterKeydown = (e) => {
+    if (e.keyCode === 13) {
+      router.push(`/?city=${city}`);
+      // Reset input text
+      setCity("");
+    }
+  };
+
+  return weatherData && !weatherData.message ? (
+    <div className="">
       <Head>
-        <title>Create Next App</title>
+        <title>Weather App</title>
         <link rel="icon" href="/favicon.ico" />
       </Head>
 
-      <main className="flex flex-col items-center justify-center w-full flex-1 px-20 text-center">
-        <h1 className="text-6xl font-bold">
-          Welcome to{' '}
-          <a className="text-blue-600" href="https://nextjs.org">
-            Next.js!
-          </a>
-        </h1>
+      <div className="flex flex-row max-w-screen-xl bg-white opacity-95  shadow-md backdrop-blur-sm rounded-3xl">
+        {/* Left */}
+        <div className="flex flex-col items-center p-10">
+          <h1 className="text-4xl font-bold mb-2">
+            {weatherData.name}, {weatherData.sys.country}
+          </h1>
 
-        <p className="mt-3 text-2xl">
-          Get started by editing{' '}
-          <code className="p-3 font-mono text-lg bg-gray-100 rounded-md">
-            pages/index.js
-          </code>
-        </p>
+          <p className="text-2xl mb-4">{weatherData.weather[0].description}</p>
 
-        <div className="flex flex-wrap items-center justify-around max-w-4xl mt-6 sm:w-full">
-          <a
-            href="https://nextjs.org/docs"
-            className="p-6 mt-6 text-left border w-96 rounded-xl hover:text-blue-600 focus:text-blue-600"
-          >
-            <h3 className="text-2xl font-bold">Documentation &rarr;</h3>
-            <p className="mt-4 text-xl">
-              Find in-depth information about Next.js features and API.
-            </p>
-          </a>
+          <Image
+            alt="weatherIcon"
+            src={`/icons/${weatherData.weather[0].icon}.svg`}
+            width={300}
+            height={300}
+          />
 
-          <a
-            href="https://nextjs.org/learn"
-            className="p-6 mt-6 text-left border w-96 rounded-xl hover:text-blue-600 focus:text-blue-600"
-          >
-            <h3 className="text-2xl font-bold">Learn &rarr;</h3>
-            <p className="mt-4 text-xl">
-              Learn about Next.js in an interactive course with quizzes!
-            </p>
-          </a>
+          <h1 className="font-bold text-6xl mt-6">{weatherData.main.temp}°C</h1>
 
-          <a
-            href="https://github.com/vercel/next.js/tree/master/examples"
-            className="p-6 mt-6 text-left border w-96 rounded-xl hover:text-blue-600 focus:text-blue-600"
-          >
-            <h3 className="text-2xl font-bold">Examples &rarr;</h3>
-            <p className="mt-4 text-xl">
-              Discover and deploy boilerplate example Next.js projects.
-            </p>
-          </a>
-
-          <a
-            href="https://vercel.com/import?filter=next.js&utm_source=create-next-app&utm_medium=default-template&utm_campaign=create-next-app"
-            className="p-6 mt-6 text-left border w-96 rounded-xl hover:text-blue-600 focus:text-blue-600"
-          >
-            <h3 className="text-2xl font-bold">Deploy &rarr;</h3>
-            <p className="mt-4 text-xl">
-              Instantly deploy your Next.js site to a public URL with Vercel.
-            </p>
-          </a>
+          <p className="mt-2">Feels like {weatherData.main.feels_like}°C</p>
         </div>
-      </main>
 
-      <footer className="flex items-center justify-center w-full h-24 border-t">
-        <a
-          className="flex items-center justify-center"
-          href="https://vercel.com?utm_source=create-next-app&utm_medium=default-template&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Powered by{' '}
-          <img src="/vercel.svg" alt="Vercel Logo" className="h-4 ml-2" />
-        </a>
-      </footer>
+        {/* Right */}
+        <div className="bg-[#F7F7F7] p-10 rounded-tr-3xl rounded-br-3xl">
+          <div className="flex justify-between">
+            <h2 className="text-xl font-bold">
+              {UTCEpochToLocalDate(weatherData.dt)}
+            </h2>
+
+            <input
+              type="text"
+              className="ml-20 rounded-xl p-2 outline-none"
+              value={city}
+              placeholder="Search a city..."
+              onChange={(e) => setCity(e.target.value)}
+              onKeyDown={(e) => {
+                enterKeydown(e);
+              }}
+            />
+          </div>
+
+          <Metrics data={weatherData} />
+
+          <div className="text-right mt-4">
+            <p className="inline m-4 cursor-pointer">Metrics System</p>
+            <p className="inline cursor-pointer">Imperial System</p>
+          </div>
+        </div>
+      </div>
     </div>
-  )
+  ) : (
+    <div className="">
+      <h1>Loading data...</h1>
+    </div>
+  );
+}
+
+// Get data from API
+export async function getServerSideProps(context) {
+  const city = context.query.city || "hanoi";
+
+  const weatherData = await fetch(
+    `https://api.openweathermap.org/data/2.5/weather?q=${city}&units=metric&appid=${process.env.API_KEY}`
+  ).then((res) => res.json());
+
+  return {
+    props: {
+      weatherData,
+    }, // will be passed to the page component as props
+  };
 }
