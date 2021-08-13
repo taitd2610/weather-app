@@ -3,7 +3,7 @@ import Head from "next/head";
 import Image from "next/image";
 import Metrics from "../components/Metrics";
 import { useRouter } from "next/router";
-import { UTCEpochToLocalDate } from "../utils/utils";
+import { unixConvert } from "../utils/utils";
 
 export default function Home({ weatherData }) {
   const router = useRouter();
@@ -26,9 +26,9 @@ export default function Home({ weatherData }) {
         <link rel="icon" href="/favicon.ico" />
       </Head>
 
-      <div className="flex flex-row max-w-screen-xl bg-white opacity-95  shadow-md backdrop-blur-sm rounded-3xl">
+      <div className="grid grid-row-1 md:grid-cols-3 bg-white opacity-95 shadow-md backdrop-blur-sm rounded-3xl m-10">
         {/* Left */}
-        <div className="flex flex-col items-center p-10">
+        <div className="flex flex-col items-center  p-10">
           <h1 className="text-4xl font-bold mb-2">
             {weatherData.name}, {weatherData.sys.country}
           </h1>
@@ -43,16 +43,12 @@ export default function Home({ weatherData }) {
           />
 
           <h1 className="font-bold text-6xl mt-6">{weatherData.main.temp}°C</h1>
-
-          <p className="mt-2">Feels like {weatherData.main.feels_like}°C</p>
         </div>
 
         {/* Right */}
-        <div className="bg-[#F7F7F7] p-10 rounded-tr-3xl rounded-br-3xl">
+        <div className="col-span-2 bg-[#F7F7F7] p-10 rounded-tr-3xl rounded-br-3xl">
           <div className="flex justify-between">
-            <h2 className="text-xl font-bold">
-              {UTCEpochToLocalDate(weatherData.dt)}
-            </h2>
+            <h2 className="text-xl font-bold">{unixConvert(weatherData.dt)}</h2>
 
             <input
               type="text"
@@ -67,11 +63,6 @@ export default function Home({ weatherData }) {
           </div>
 
           <Metrics data={weatherData} />
-
-          <div className="text-right mt-4">
-            <p className="inline m-4 cursor-pointer">Metrics System</p>
-            <p className="inline cursor-pointer">Imperial System</p>
-          </div>
         </div>
       </div>
     </div>
